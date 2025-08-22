@@ -1,0 +1,13 @@
+body {
+    transition: background 0.3s;
+}
+
+.card {
+    max-width: 800px;
+    margin: auto;
+}
+
+#theme-toggle {
+    float: right;
+    cursor: pointer;
+}

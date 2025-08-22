@@ -1,0 +1,22 @@
+body.dark-mode {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+
+.dark-mode .table {
+  color: #fff;
+  background-color: #1f1f1f;
+}
+
+.dark-mode .table-bordered {
+  border-color: #333;
+}
+
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea,
+.dark-mode .form-control {
+  background-color: #1e1e1e;
+  color: white;
+  border: 1px solid #555;
+}

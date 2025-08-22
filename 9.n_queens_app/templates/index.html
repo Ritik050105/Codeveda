@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>N-Queens Solver</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body.light-mode {
+      background-color: #f8f9fa;
+      color: #212529;
+    }
+
+    body.dark-mode {
+      background-color: #212529;
+      color: #f8f9fa;
+    }
+
+    .dark-mode .card {
+      background-color: #343a40;
+      color: white;
+    }
+
+    .light-mode .card {
+      background-color: white;
+      color: black;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1000;
+    }
+
+    .chessboard {
+      display: grid;
+      gap: 1px;
+      margin: auto;
+    }
+
+    .cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .white {
+      background-color: #eee;
+    }
+
+    .black {
+      background-color: #666;
+    }
+
+    .queen {
+      color: red;
+      font-weight: bold;
+    }
+
+    #vizBoard {
+      margin-top: 20px;
+      display: grid;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="theme-toggle">
+    <button class="btn btn-outline-secondary" onclick="toggleTheme()">🌓 Theme</button>
+  </div>
+
+  <div class="container py-5">
+    <h1 class="text-center mb-4">♛ N-Queens Solver</h1>
+
+    <form method="POST" class="row g-3 justify-content-center mb-4">
+      <div class="col-auto">
+        <input type="number" name="n" class="form-control" placeholder="Enter N (4-12)" required min="4" max="12">
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Solve</button>
+      </div>
+    </form>
+
+    {% if solutions %}
+      <div id="solutionContainer">
+        <h3 class="text-center">Found {{ solutions|length }} solution{{ 's' if solutions|length > 1 else '' }}</h3>
+        <div class="text-center mb-3">
+          <a href="{{ url_for('download', n=n) }}" class="btn btn-success">📥 Download Solutions</a>
+          <button onclick="startVisualization()" class="btn btn-warning">▶️ Visualize First Solution</button>
+        </div>
+        <div class="d-flex flex-wrap justify-content-center gap-4">
+          {% for sol in solutions %}
+            <div class="card p-2">
+              <div class="chessboard" style="grid-template-columns: repeat({{n}}, 1fr);">
+                {% for row in sol %}
+                  {% for col in range(n) %}
+                    {% set is_black = (loop.index0 + loop.index) % 2 == 0 %}
+                    <div class="cell {{ 'black' if is_black else 'white' }}">
+                      {% if row[col] == 1 %} <span class="queen">♛</span> {% endif %}
+                    </div>
+                  {% endfor %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div id="visualization" class="text-center mt-5 d-none">
+        <h4>Step-by-step Visualization</h4>
+        <div id="vizBoard" style="grid-template-columns: repeat({{ n }}, 40px);"></div>
+      </div>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle("dark-mode");
+      body.classList.toggle("light-mode");
+      localStorage.setItem("theme", body.classList.contains("dark-mode") ? "dark" : "light");
+    }
+
+    window.onload = function () {
+      const saved = localStorage.getItem("theme") || "light";
+      document.body.classList.add(saved + "-mode");
+    };
+  </script>
+
+  {% if solutions %}
+  <script>
+    const firstBoard = {{ solutions[0]|tojson }};
+    function startVisualization() {
+      document.getElementById('solutionContainer').classList.add('d-none');
+      document.getElementById('visualization').classList.remove('d-none');
+
+      const board = firstBoard;
+      const n = {{ n }};
+      const container = document.getElementById("vizBoard");
+      container.innerHTML = "";
+
+      for (let i = 0; i < n * n; i++) {
+        const cell = document.createElement("div");
+        const row = Math.floor(i / n);
+        const col = i % n;
+        const isBlack = (row + col) % 2 === 0;
+        cell.className = "cell " + (isBlack ? "black" : "white");
+        container.appendChild(cell);
+      }
+
+      let step = 0;
+      const interval = setInterval(() => {
+        if (step >= n) {
+          clearInterval(interval);
+          return;
+        }
+        for (let col = 0; col < n; col++) {
+          if (board[step][col] === 1) {
+            const index = step * n + col;
+            const queen = document.createElement("span");
+            queen.className = "queen";
+            queen.textContent = "♛";
+            container.children[index].appendChild(queen);
+          }
+        }
+        step++;
+      }, 700);
+    }
+  </script>
+  {% endif %}
+</body>
+</html>
